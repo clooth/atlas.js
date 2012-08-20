@@ -5,18 +5,20 @@ The aim of the project is to create a sort of library of utilities and "extensio
 
 [Examples](http://clooth.github.com/atlas.js) &mdash; [Documentation](http://clooth.github.com/atlas.js/docs) &mdash; [FAQ](http://github.com/clooth/atlas.js/wiki/FAQ)
 
-TODO:
-
-- Get rid of jColour dependency
-
-## Usage
+### Usage
 
 Download the minified library and include it in your HTML.
 
     <script src="js/atlas.min.js"></script>
 
-## Change log
+### Change log
 
 2012/08/20 - r01
 
 * Project started
+
+### TODO
+
+* Get rid of jColour dependency
+* Write custom marker manager
+* Write custom marker clusterer
