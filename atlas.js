@@ -9,7 +9,7 @@ var Atlas;
     for (_i = 0, _len = vendors.length; _i < _len; _i++) {
       vendor = vendors[_i];
       window.requestAnimationFrame = window[vendor + 'RequestAnimationFrame'];
-      window.cancelAnimationFrame = window[vendor + 'CancelAnimationFrame'] || window[vendor + CancelRequestAnimationFrame];
+      window.cancelAnimationFrame = window[vendor + 'CancelAnimationFrame'] || window[vendor + 'CancelRequestAnimationFrame'];
     }
   }
   if (!window.requestAnimationFrame) {
@@ -30,6 +30,34 @@ var Atlas;
     };
   }
 })();
+
+CanvasRenderingContext2D.prototype.pinShape = function(x, y, width, height, fill, stroke) {
+  var arc, center;
+  if (fill == null) {
+    fill = false;
+  }
+  if (stroke == null) {
+    stroke = false;
+  }
+  center = {
+    x: x + width / 2,
+    y: y + height / 2
+  };
+  arc = {
+    y: y + height / 3
+  };
+  this.beginPath();
+  this.arc(center.x, y + height / 3, width / 2, Math.PI, 0, false);
+  this.bezierCurveTo(x + width, arc.y + height / 4, center.x + width / 3, center.y, center.x, y + height);
+  this.moveTo(x, arc.y);
+  this.bezierCurveTo(x, arc.y + height / 4, center.x - width / 3, center.y, center.x, y + height);
+  if (fill) {
+    this.fill();
+  }
+  if (stroke) {
+    return this.stroke();
+  }
+};
 
 Atlas = (function() {
 
@@ -126,12 +154,12 @@ Atlas.MapMarker = (function() {
     this.canvas.width = this.width;
     this.canvas.height = this.height + this.size / 4;
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.icon = this.createMarker();
+    this.icon = this.createIcon();
     return this.marker.setIcon(this.icon);
   };
 
   MapMarker.prototype.createIcon = function() {
-    var baseColor, baseGradient, baseGradientColors, borderColor, borderGradient, borderGradientColors;
+    var baseColor, baseGradient, baseGradientColors, borderColor, borderGradient, borderGradientColors, params, pinShapeParams, _i, _len, _ref;
     this.drawShadow();
     baseColor = new jColour(this.color.rgb());
     baseGradientColors = {
@@ -148,16 +176,20 @@ Atlas.MapMarker = (function() {
     };
     borderGradient = this.context.createLinearGradient(0, 0, this.width, this.height);
     borderGradient.addColorStop(0, borderGradientColors.start);
-    borderGradient.addcolorStop(1, borderGradientColors.end);
+    borderGradient.addColorStop(1, borderGradientColors.end);
     this.context.lineWidth = 1.5;
-    this.drawPinShape(1.5, 0.0, this.width - 3.5, this.height, baseGradient, borderGradient);
-    this.drawPinShape(2.0, 1.0, this.width - 4.25, this.height - 2.5, new jColour(this.color.rgb()).ligthen(25).hex(), false);
-    this.drawPinShape(2.0, 2.5, this.width - 4.25, this.height - 4.0, baseGradient, false);
+    pinShapeParams = [[1.5, 0.0, this.width - 3.5, this.height, baseGradient, borderGradient], [2.0, 1.0, this.width - 4.25, this.height - 2.5, new jColour(this.color.rgb()).lighten(25).hex(), false], [2.0, 2.5, this.width - 4.25, this.height - 4.0, baseGradient, false]];
+    for (_i = 0, _len = pinShapeParams.length; _i < _len; _i++) {
+      params = pinShapeParams[_i];
+      this.context.fillStyle = params[4] ? params[4] : false;
+      this.context.strokeStyle = params[5] ? params[5] : false;
+      (_ref = this.context).pinShape.apply(_ref, params);
+    }
     this.context.beginPath();
     this.context.arc(this.width / 2, this.height / 3, this.width / 6, Math.PI * 2, 0, false);
     this.context.fillStyle = '#fff';
     this.context.fill();
-    return new google.maps.MarkerImage(this.canvas.toDataURL(), new google.maps.Size(this.width, this.canvas.height(), new google.maps.Point(0, 0, new google.maps.Point(this.width / 2, this.height))));
+    return new google.maps.MarkerImage(this.canvas.toDataURL(), new google.maps.Size(this.width, this.canvas.height, new google.maps.Point(0, 0, new google.maps.Point(this.width / 2, this.height))));
   };
 
   MapMarker.prototype.drawShadow = function() {
@@ -176,7 +208,7 @@ Atlas.MapMarker = (function() {
     };
     gradient = this.context.createRadialGradient(center.x, center.y, 0, center.x, center.y, size.width / 2);
     gradient.addColorStop(0, 'rgba(0, 0, 0, 0.30)');
-    gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
     this.context.setTransform(1, 0, 0, 0.5, 0, 0);
     this.context.translate(0, this.height + size.height / 2);
     this.context.fillStyle = gradient;
@@ -210,9 +242,11 @@ Atlas.MapMarker = (function() {
     }
   };
 
-  MapMarker.prototype.animateSize = function(currentSize) {
+  MapMarker.prototype.animateSize = function(currentSize, minSize, maxSize) {
     var newSize,
       _this = this;
+    this.minSize = minSize;
+    this.maxSize = maxSize;
     if (this.isGrown && currentSize <= this.minSize) {
       this.isGrown = false;
       return;
@@ -225,7 +259,7 @@ Atlas.MapMarker = (function() {
     this.width = newSize;
     this.height = newSize * 1.5;
     return requestAnimationFrame(function() {
-      return _this.animateSize(newSize);
+      return _this.animateSize(newSize, minSize, maxSize);
     });
   };
 

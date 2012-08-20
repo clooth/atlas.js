@@ -97,7 +97,7 @@ class Atlas.MapMarker
         @context.clearRect 0, 0, @canvas.width, @canvas.height
 
         # Create the marker icon and assign it to the marker
-        @icon = this.createMarker()
+        @icon = this.createIcon()
         @marker.setIcon(@icon)
 
     createIcon: () ->
@@ -120,13 +120,19 @@ class Atlas.MapMarker
 
         borderGradient = @context.createLinearGradient 0, 0, @width, @height
         borderGradient.addColorStop 0, borderGradientColors.start
-        borderGradient.addcolorStop 1, borderGradientColors.end
+        borderGradient.addColorStop 1, borderGradientColors.end
 
         # Draw the basic marker shape
         @context.lineWidth = 1.5
-        this.drawPinShape 1.5, 0.0, @width - 3.5, @height, baseGradient, borderGradient
-        this.drawPinShape 2.0, 1.0, @width - 4.25, @height - 2.5, new jColour(@color.rgb()).ligthen(25).hex(), false
-        this.drawPinShape 2.0, 2.5, @width - 4.25, @height - 4.0, baseGradient, false
+        pinShapeParams = [
+            [1.5, 0.0, @width - 3.5, @height, baseGradient, borderGradient],
+            [2.0, 1.0, @width - 4.25, @height - 2.5, new jColour(@color.rgb()).lighten(25).hex(), false],
+            [2.0, 2.5, @width - 4.25, @height - 4.0, baseGradient, false]
+        ]
+        for params in pinShapeParams
+            @context.fillStyle   = if params[4] then params[4] else false
+            @context.strokeStyle = if params[5] then params[5] else false
+            @context.pinShape(params...)
 
         # Draw the middle white ball
         @context.beginPath()
@@ -135,7 +141,7 @@ class Atlas.MapMarker
         @context.fill()
 
         return new google.maps.MarkerImage @canvas.toDataURL(),
-            new google.maps.Size @width, @canvas.height(),
+            new google.maps.Size @width, @canvas.height,
             new google.maps.Point 0, 0,
             new google.maps.Point @width / 2, @height
 
@@ -161,7 +167,7 @@ class Atlas.MapMarker
             size.width / 2
         )
         gradient.addColorStop 0, 'rgba(0, 0, 0, 0.30)'
-        gradient.addColorStop 0, 'rgba(0, 0, 0, 0)'
+        gradient.addColorStop 1, 'rgba(0, 0, 0, 0)'
 
         @context.setTransform 1, 0, 0, 0.5, 0, 0
         @context.translate 0, @height + size.height / 2
@@ -217,7 +223,10 @@ class Atlas.MapMarker
             @context.strokeStyle = stroke
             @context.stroke()
 
-    animateSize: (currentSize) ->
+    animateSize: (currentSize, minSize, maxSize) ->
+        @minSize = minSize
+        @maxSize = maxSize
+
         if @isGrown and currentSize <= @minSize
             @isGrown = false
             return
@@ -232,6 +241,6 @@ class Atlas.MapMarker
         @height = newSize * 1.5
 
         requestAnimationFrame () =>
-            this.animateSize(newSize)
+            this.animateSize(newSize, minSize, maxSize)
 
 window.Atlas = Atlas

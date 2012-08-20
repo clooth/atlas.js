@@ -27,6 +27,16 @@
                     zoom: 4,
                     mapTypeId: google.maps.MapTypeId.ROADMAP
                 });
+
+                mainMap.addMarker({
+                    latitude: 62.0000,
+                    longitude: 24.0000,
+                    size: 32,
+                    color: '#f00',
+                    title: 'Basic marker',
+                    map: mainMap.map,
+                    animation: google.maps.Animation.DROP
+                });
             })
         </script>
     </body>
