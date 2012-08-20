@@ -15,7 +15,8 @@ class Atlas
 
 #### Atlas.Util
 class Atlas.Util
-    constructor: (@color) ->
+
+Atlas.Util::Color = (@color) ->
 
 
 #### Atlas.Map
@@ -146,9 +147,9 @@ class Atlas.MapMarker
         @context.fill()
 
         return new google.maps.MarkerImage @canvas.toDataURL(),
-            new google.maps.Size @width, @canvas.height,
-            new google.maps.Point 0, 0,
-            new google.maps.Point @width / 2, @height
+            new google.maps.Size(@width, @canvas.height),
+            new google.maps.Point(0, 0),
+            new google.maps.Point(@width / 2, @height)
 
     drawShadow: () ->
         size =
@@ -183,50 +184,6 @@ class Atlas.MapMarker
 
         @context.closePath()
         @context.setTransform 1, 0, 0, 1, 0, 0
-
-    drawPinShape: (x, y, width, height, fill, stroke) ->
-        center =
-            x: x + width / 2,
-            y: x + height / 2
-
-        arcPosition =
-            y: y + height / 3
-
-        @context.beginPath()
-
-        # Draw the arc across the top of the shape
-        @context.arc @center.x, y + height / 3, width / 2, Math.PI, 0, false
-
-        # Draw the right-side line to the bottom middle
-        @context.bezierCurveTo(
-            x + width,
-            arcPosition.y + height / 4,
-            center.x + width / 3,
-            center.y,
-            center.x,
-            y + height
-        )
-
-        # Draw the left side curve but start from the top left area
-        @context.moveTo x, arcPosition.bottom
-        @context.bezierCurveTo(
-            x,
-            arcPosition.y + height / 4,
-            center.x - width / 3,
-            center.y,
-            center.y,
-            y + height
-        )
-
-        # Do we want to fill the shape?
-        if fill
-            @context.fillStyle = fill
-            @context.fill()
-
-        # What about stroke?
-        if stroke
-            @context.strokeStyle = stroke
-            @context.stroke()
 
     animateSize: (currentSize, minSize, maxSize) ->
         @minSize = minSize

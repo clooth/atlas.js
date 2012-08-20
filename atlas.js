@@ -578,13 +578,15 @@
 
   Atlas.Util = (function() {
 
-    function Util(color) {
-      this.color = color;
-    }
+    function Util() {}
 
     return Util;
 
   })();
+
+  Atlas.Util.prototype.Color = function(color) {
+    this.color = color;
+  };
 
   Atlas.Map = (function() {
 
@@ -699,7 +701,7 @@
       this.context.arc(this.width / 2, this.height / 3, this.width / 6, Math.PI * 2, 0, false);
       this.context.fillStyle = '#fff';
       this.context.fill();
-      return new google.maps.MarkerImage(this.canvas.toDataURL(), new google.maps.Size(this.width, this.canvas.height, new google.maps.Point(0, 0, new google.maps.Point(this.width / 2, this.height))));
+      return new google.maps.MarkerImage(this.canvas.toDataURL(), new google.maps.Size(this.width, this.canvas.height), new google.maps.Point(0, 0), new google.maps.Point(this.width / 2, this.height));
     };
 
     MapMarker.prototype.drawShadow = function() {
@@ -726,30 +728,6 @@
       this.context.fill();
       this.context.closePath();
       return this.context.setTransform(1, 0, 0, 1, 0, 0);
-    };
-
-    MapMarker.prototype.drawPinShape = function(x, y, width, height, fill, stroke) {
-      var arcPosition, center;
-      center = {
-        x: x + width / 2,
-        y: x + height / 2
-      };
-      arcPosition = {
-        y: y + height / 3
-      };
-      this.context.beginPath();
-      this.context.arc(this.center.x, y + height / 3, width / 2, Math.PI, 0, false);
-      this.context.bezierCurveTo(x + width, arcPosition.y + height / 4, center.x + width / 3, center.y, center.x, y + height);
-      this.context.moveTo(x, arcPosition.bottom);
-      this.context.bezierCurveTo(x, arcPosition.y + height / 4, center.x - width / 3, center.y, center.y, y + height);
-      if (fill) {
-        this.context.fillStyle = fill;
-        this.context.fill();
-      }
-      if (stroke) {
-        this.context.strokeStyle = stroke;
-        return this.context.stroke();
-      }
     };
 
     MapMarker.prototype.animateSize = function(currentSize, minSize, maxSize) {

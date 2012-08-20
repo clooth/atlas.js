@@ -11,31 +11,69 @@
         <meta name="viewport" content="width=device-width">
         <link rel="stylesheet" href="css/core.css">
         <script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+        <script src="../atlas.js"></script>
     </head>
     <body>
-        <div id="map-container" width="960" height="600"></div>
-        <script src="../atlas.min.js"></script>
+        <h1>Atlas.js Examples</h1>
+        <section>
+            <h2>Single marker example</h2>
+            <div id="single-marker" class="map" style="width: 480px;"></div>
+        </section>
+        <section>
+            <h2>Multiple markers example</h2>
+            <div id="multiple-markers" class="map" style="width: 480px;"></div>
+        </section>
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                var atlas = new Atlas()
+            //document.addEventListener("DOMContentLoaded", function() {
+                // Create the main Atlas instance
+                var atlas = new Atlas();
 
-                var mainMap = atlas.createMap({
-                    container: 'map-container',
-                    center: new google.maps.LatLng(62.0000, 24.0000),
-                    zoom: 4,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP
-                });
+                // Simple marker demo
+                (function() {
+                    var singleMarkerMap = atlas.createMap({
+                        container: 'single-marker',
+                        center: new google.maps.LatLng(62.0000, 24.0000),
+                        zoom: 4,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP
+                    });
 
-                mainMap.addMarker({
-                    latitude: 62.0000,
-                    longitude: 24.0000,
-                    size: 32,
-                    color: '#f00',
-                    title: 'Basic marker',
-                    map: mainMap.map,
-                    animation: google.maps.Animation.DROP
-                });
-            });
+                    singleMarkerMap.addMarker({
+                        latitude: 62.0000,
+                        longitude: 24.0000,
+                        size: 32,
+                        color: '#f00',
+                        title: 'Basic marker',
+                        map: singleMarkerMap.map,
+                        animation: google.maps.Animation.DROP
+                    });
+                })(atlas);
+
+                // Multiple markers demo
+                (function() {
+                    var multiMarkerMap = atlas.createMap({
+                        container: 'multiple-markers',
+                        center: new google.maps.LatLng(12.0000, 45.0000),
+                        zoom: 5,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP
+                    });
+
+                    var count = 50;
+                    for (var i = 0; i < count; i += 1) {
+                        var baseColor = new jColour('#f00');
+
+                        multiMarkerMap.addMarker({
+                            latitude: 16.0000 + (Math.random() * (Math.random() * i)),
+                            longitude: 33.0000 + (Math.random() * (Math.random() * i)),
+                            size: 16 + ((Math.random() * (Math.random() * 8) + 1)),
+                            color: baseColor.adjustHue(i*(100/count)).rgb(),
+                            title: 'Marker '+ i,
+                            map: multiMarkerMap.map,
+                            animation: google.maps.Animation.DROP
+                        });
+                    }
+                    multiMarkerMap.fitToMarkers();
+                })(atlas);
+            //});
         </script>
     </body>
 </html>

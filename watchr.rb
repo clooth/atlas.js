@@ -10,7 +10,7 @@ watch( 'src/(.*)\.coffee' ) do |md|
     system("coffee -o . --join atlas.js --compile #{filelistString}")
 
     puts "Uglifying javascript"
-    system("uglifyjs -o atlas.min.js atlas.js")
+    system("uglifyjs -o atlas.min.js atlas.js && git add *.js")
 
     puts "Updating docs..."
     system("docco src/#{md[1]}.coffee && git add docs")
