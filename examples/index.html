@@ -14,11 +14,9 @@
     </head>
     <body>
         <div id="map-container" width="960" height="600"></div>
-        <script src="http://code.jquery.com/jquery.min.js"></script>
-        <script type="text/javascript" src="https://raw.github.com/aaronrussell/jcolour/master/build/jColour.min.js"></script>
-        <script src="../atlas.js"></script>
+        <script src="../atlas.min.js"></script>
         <script>
-            $(function() {
+            document.addEventListener("DOMContentLoaded", function() {
                 var atlas = new Atlas()
 
                 var mainMap = atlas.createMap({
@@ -37,7 +35,7 @@
                     map: mainMap.map,
                     animation: google.maps.Animation.DROP
                 });
-            })
+            });
         </script>
     </body>
 </html>
