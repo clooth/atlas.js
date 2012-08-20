@@ -1,0 +1,8 @@
+---
+layout: default
+title: Showcase of cool usage
+---
+
+h1. Showcasing cool uses of Atlas.js
+
+Hello world.
