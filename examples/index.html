@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Atlas.js</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="css/core.css">
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    </head>
+    <body>
+        <div id="map-container" width="960" height="600"></div>
+        <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script type="text/javascript" src="https://raw.github.com/aaronrussell/jcolour/master/build/jColour.min.js"></script>
+        <script src="../atlas.js"></script>
+        <script>
+            $(function() {
+                var atlas = new Atlas()
+
+                var mainMap = atlas.createMap({
+                    container: 'map-container',
+                    center: new google.maps.LatLng(62.0000, 24.0000),
+                    zoom: 4,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                });
+            })
+        </script>
+    </body>
+</html>
