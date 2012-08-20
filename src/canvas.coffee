@@ -13,7 +13,6 @@ CanvasRenderingContext2D::pinShape = (x, y, width, height, fill=false, stroke=fa
     arc =
         y: y + height / 3
 
-
     # Start drawing
     this.beginPath()
 

@@ -13,6 +13,11 @@ class Atlas
         map
 
 
+#### Atlas.Util
+class Atlas.Util
+    constructor: (@color) ->
+
+
 #### Atlas.Map
 class Atlas.Map
 
