@@ -19,6 +19,7 @@ Download the minified library and include it in your HTML.
 
 ### TODO
 
-* Get rid of jColour dependency
+* Write simplified color editing methods to get rid of jColour
 * Write custom marker manager
 * Write custom marker clusterer
+* Document better
