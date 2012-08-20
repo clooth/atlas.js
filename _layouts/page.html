@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Atlas.js</title>
+    <link rel="stylesheet" href="styles/core.css">
+    <link rel="stylesheet" href="styles/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <img src="images/atlas.png" alt="[Atlas Icon]">
+        <hgroup>
+          <h1>Atlas.js</h1>
+          <h3>Superawesome Google Maps</h3>
+        </hgroup>
+        <p class="view"><a href="http://github.com/clooth/atlas.js">View the Project on GitHub</a></p>
+        <ul>
+          <li><a href="https://github.com/clooth/atlas.js/zipballmus/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/clooth/atlas.js/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="http://github.com/clooth/atlas.js">Fork On <strong>GitHub</strong></a></li>
+        </ul>
+        <nav id="mast-nav">
+          <ol>
+            {% for page in site.pages limit: 15 %}
+              <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+            {% endfor %}
+          </ol>
+        </nav>
+      </header>
+      <section>
+        {{ content }}
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="http://github.com/clooth">Clooth</a></p>
+        <p><small>Theme based on <a href="https://github.com/orderedlist/minimal">minimal</a> by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="scripts/scale.fix.js"></script>
+  </body>
+</html>
