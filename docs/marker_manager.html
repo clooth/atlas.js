@@ -1,0 +1,886 @@
+<!DOCTYPE html>  <html> <head>   <title>marker_manager.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="atlas.html">                 atlas.coffee               </a>                                           <a class="source" href="canvas.html">                 canvas.coffee               </a>                                           <a class="source" href="marker_manager.html">                 marker_manager.coffee               </a>                                           <a class="source" href="util.html">                 util.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               marker_manager.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <h3>ProjectionHelperOverlay</h3>             </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">ProjectionHelperOverlay</span> <span class="k">extends</span> <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">OverlayView</span>
+  <span class="nv">constructor: </span><span class="nf">(@map) -&gt;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">setMap</span><span class="p">(</span><span class="nx">@map</span><span class="p">)</span>
+
+    <span class="nv">TILEFACTOR = </span><span class="mi">8</span>
+    <span class="nv">TILESIDE = </span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="nx">TILEFACTOR</span>
+    <span class="nv">RADIUS = </span><span class="mi">7</span>
+
+    <span class="vi">@zoom = </span><span class="o">-</span><span class="mi">1</span>
+    <span class="vi">@X0 = @Y0 = @X1 = @Y1 = </span><span class="o">-</span><span class="mi">1</span>
+
+  <span class="nv">lngToX = </span><span class="nf">(lng) -&gt;</span>
+    <span class="mi">1</span> <span class="o">+</span> <span class="nx">lng</span> <span class="o">/</span> <span class="mi">10</span>
+
+  <span class="nv">latToY = </span><span class="nf">(lat) -&gt;</span>
+    <span class="nv">sinofphi = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">sin</span> <span class="nx">lat</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">PI</span> <span class="o">/</span> <span class="mi">180</span>
+    <span class="mi">1</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">/</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">PI</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">log</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="nx">sinofphi</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="nx">sinofphi</span><span class="p">))</span>
+
+  <span class="nv">latLngToPx = </span><span class="nf">(latLng, zoom) -&gt;</span>
+    <span class="nv">div = </span><span class="k">this</span><span class="p">.</span><span class="nx">getProject</span><span class="p">().</span><span class="nx">fromLatLngToDivPixel</span><span class="p">(</span><span class="nx">latLng</span><span class="p">)</span>
+    <span class="nv">abs =</span>
+      <span class="nv">x: </span><span class="o">~~</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">lngToX</span><span class="p">(</span><span class="nx">latLng</span><span class="p">.</span><span class="nx">lng</span><span class="p">())</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="nx">zoom</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)))</span>
+      <span class="nv">y: </span><span class="o">~~</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">latToY</span><span class="p">(</span><span class="nx">latLng</span><span class="p">.</span><span class="nx">lat</span><span class="p">())</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="nx">zoom</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)))</span>
+    <span class="nx">abs</span>
+
+  <span class="nv">draw = </span><span class="nf">() -&gt;</span>
+    <span class="nx">unless</span> <span class="nx">@ready</span>
+      <span class="vi">@ready = </span><span class="kc">true</span>
+      <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">trigger</span> <span class="k">this</span><span class="p">,</span> <span class="s">&#39;ready&#39;</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <h3>MarkerManager</h3>             </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">MarkerManager</span>
+  <span class="nv">constructor: </span><span class="nf">(@map, options) -&gt;</span>
+    <span class="vi">@mapZoom = </span><span class="nx">@map</span><span class="p">.</span><span class="nx">getZoom</span><span class="p">()</span>
+    <span class="vi">@projectionHelper = </span><span class="k">new</span> <span class="nx">ProjectionHelperOverlay</span> <span class="nx">@map</span>
+
+    <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">addListener@projectionHelper</span><span class="p">,</span> <span class="s">&#39;ready&#39;</span><span class="p">,</span> <span class="nf">() -&gt;</span>
+      <span class="vi">@projection = </span><span class="k">this</span><span class="p">.</span><span class="nx">getProjection</span><span class="p">()</span>
+      <span class="nx">@initialize</span><span class="p">(</span><span class="nx">@map</span><span class="p">,</span> <span class="nx">@options</span><span class="p">)</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Creates</span> <span class="nx">a</span> <span class="k">new</span> <span class="nx">MarkerManager</span> <span class="nx">that</span> <span class="nx">will</span> <span class="nx">show</span><span class="o">/</span><span class="nx">hide</span> <span class="nx">markers</span> <span class="kc">on</span> <span class="nx">a</span> <span class="nx">map</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nv">Events:</span>
+ <span class="o">*</span> <span class="nx">@event</span> <span class="nx">changed</span> <span class="p">(</span><span class="nv">Parameters: </span><span class="nx">shown</span> <span class="nx">bounds</span><span class="p">,</span> <span class="nx">shown</span> <span class="nx">markers</span><span class="p">)</span> <span class="nx">Notify</span> <span class="nx">listeners</span> <span class="k">when</span> <span class="nx">the</span> <span class="nx">state</span> <span class="k">of</span> <span class="nx">what</span> <span class="o">is</span> <span class="nx">displayed</span> <span class="nx">changes</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@event</span> <span class="nx">loaded</span> <span class="nx">MarkerManager</span> <span class="nx">has</span> <span class="nx">succesfully</span> <span class="nx">been</span> <span class="nx">initialized</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@constructor</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">Map</span><span class="p">}</span> <span class="nx">map</span> <span class="nx">The</span> <span class="nx">map</span> <span class="nx">to</span> <span class="nx">manage</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Object</span><span class="p">}</span> <span class="nx">opt_opts</span> <span class="nx">A</span> <span class="nx">container</span> <span class="k">for</span> <span class="nx">optional</span> <span class="nv">arguments:</span>
+ <span class="o">*</span>   <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">maxZoom</span> <span class="nx">The</span> <span class="nx">maximum</span> <span class="nx">zoom</span> <span class="nx">level</span> <span class="k">for</span> <span class="nx">which</span> <span class="nx">to</span> <span class="nx">create</span> <span class="nx">tiles</span><span class="p">.</span>
+ <span class="o">*</span>   <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">borderPadding</span> <span class="nx">The</span> <span class="nx">width</span> <span class="k">in</span> <span class="nx">pixels</span> <span class="nx">beyond</span> <span class="nx">the</span> <span class="nx">map</span> <span class="nx">border</span><span class="p">,</span>
+ <span class="o">*</span>                   <span class="nx">where</span> <span class="nx">markers</span> <span class="nx">should</span> <span class="nx">be</span> <span class="nx">display</span><span class="p">.</span>
+ <span class="o">*</span>   <span class="p">{</span><span class="nb">Boolean</span><span class="p">}</span> <span class="nx">trackMarkers</span> <span class="nx">Whether</span> <span class="o">or</span> <span class="o">not</span> <span class="k">this</span> <span class="nx">manager</span> <span class="nx">should</span> <span class="nx">track</span> <span class="nx">marker</span>
+ <span class="o">*</span>                   <span class="nx">movements</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nx">function</span> <span class="nx">MarkerManager</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="nx">opt_opts</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">me = </span><span class="k">this</span><span class="p">;</span>
+  <span class="nv">me.map_ = </span><span class="nx">map</span><span class="p">;</span>
+  <span class="nv">me.mapZoom_ = </span><span class="nx">map</span><span class="p">.</span><span class="nx">getZoom</span><span class="p">();</span>
+
+  <span class="nv">me.projectionHelper_ = </span><span class="k">new</span> <span class="nx">ProjectionHelperOverlay</span><span class="p">(</span><span class="nx">map</span><span class="p">);</span>
+  <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="nx">me</span><span class="p">.</span><span class="nx">projectionHelper_</span><span class="p">,</span> <span class="s">&#39;ready&#39;</span><span class="p">,</span> <span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nv">me.projection_ = </span><span class="k">this</span><span class="p">.</span><span class="nx">getProjection</span><span class="p">();</span>
+    <span class="nx">me</span><span class="p">.</span><span class="nx">initialize</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="nx">opt_opts</span><span class="p">);</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+
+
+<span class="nv">MarkerManager.prototype.initialize = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="nx">opt_opts</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">me = </span><span class="k">this</span><span class="p">;</span>
+
+  <span class="nv">opt_opts = </span><span class="nx">opt_opts</span> <span class="o">||</span> <span class="p">{};</span>
+  <span class="nv">me.tileSize_ = </span><span class="nx">MarkerManager</span><span class="p">.</span><span class="nx">DEFAULT_TILE_SIZE_</span><span class="p">;</span>
+
+  <span class="nx">var</span> <span class="nv">mapTypes = </span><span class="nx">map</span><span class="p">.</span><span class="nx">mapTypes</span><span class="p">;</span>
+
+  <span class="o">//</span> <span class="nx">Find</span> <span class="nx">max</span> <span class="nx">zoom</span> <span class="nx">level</span>
+  <span class="nx">var</span> <span class="nv">mapMaxZoom = </span><span class="mi">1</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="nx">var</span> <span class="nx">sType</span> <span class="k">in</span> <span class="nx">mapTypes</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">map</span><span class="p">.</span><span class="nx">mapTypes</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">sType</span><span class="p">)</span> <span class="o">===</span> <span class="s">&#39;object&#39;</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span> <span class="nx">map</span><span class="p">.</span><span class="nx">mapTypes</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">sType</span><span class="p">).</span><span class="nx">maxZoom</span> <span class="o">===</span> <span class="s">&#39;number&#39;</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">var</span> <span class="nv">mapTypeMaxZoom = </span><span class="nx">map</span><span class="p">.</span><span class="nx">mapTypes</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">sType</span><span class="p">).</span><span class="nx">maxZoom</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">mapTypeMaxZoom</span> <span class="o">&gt;</span> <span class="nx">mapMaxZoom</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">mapMaxZoom = </span><span class="nx">mapTypeMaxZoom</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="nv">me.maxZoom_  = </span><span class="nx">opt_opts</span><span class="p">.</span><span class="nx">maxZoom</span> <span class="o">||</span> <span class="mi">19</span><span class="p">;</span>
+
+  <span class="nv">me.trackMarkers_ = </span><span class="nx">opt_opts</span><span class="p">.</span><span class="nx">trackMarkers</span><span class="p">;</span>
+  <span class="nv">me.show_ = </span><span class="nx">opt_opts</span><span class="p">.</span><span class="nx">show</span> <span class="o">||</span> <span class="kc">true</span><span class="p">;</span>
+
+  <span class="nx">var</span> <span class="nx">padding</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">opt_opts</span><span class="p">.</span><span class="nx">borderPadding</span> <span class="o">===</span> <span class="s">&#39;number&#39;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">padding = </span><span class="nx">opt_opts</span><span class="p">.</span><span class="nx">borderPadding</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nv">padding = </span><span class="nx">MarkerManager</span><span class="p">.</span><span class="nx">DEFAULT_BORDER_PADDING_</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="o">//</span> <span class="nx">The</span> <span class="nx">padding</span> <span class="k">in</span> <span class="nx">pixels</span> <span class="nx">beyond</span> <span class="nx">the</span> <span class="nx">viewport</span><span class="p">,</span> <span class="nx">where</span> <span class="nx">we</span> <span class="nx">will</span> <span class="nx">pre</span><span class="o">-</span><span class="nx">load</span> <span class="nx">markers</span><span class="p">.</span>
+  <span class="nv">me.swPadding_ = </span><span class="k">new</span> <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">Size</span><span class="p">(</span><span class="o">-</span><span class="nx">padding</span><span class="p">,</span> <span class="nx">padding</span><span class="p">);</span>
+  <span class="nv">me.nePadding_ = </span><span class="k">new</span> <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">Size</span><span class="p">(</span><span class="nx">padding</span><span class="p">,</span> <span class="o">-</span><span class="nx">padding</span><span class="p">);</span>
+  <span class="nv">me.borderPadding_ = </span><span class="nx">padding</span><span class="p">;</span>
+
+  <span class="nv">me.gridWidth_ = </span><span class="p">{};</span>
+
+  <span class="nv">me.grid_ = </span><span class="p">{};</span>
+  <span class="nx">me</span><span class="p">.</span><span class="nx">grid_</span><span class="p">[</span><span class="nx">me</span><span class="p">.</span><span class="nx">maxZoom_</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+  <span class="nv">me.numMarkers_ = </span><span class="p">{};</span>
+  <span class="nx">me</span><span class="p">.</span><span class="nx">numMarkers_</span><span class="p">[</span><span class="nx">me</span><span class="p">.</span><span class="nx">maxZoom_</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+
+  <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="s">&#39;dragend&#39;</span><span class="p">,</span> <span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">me</span><span class="p">.</span><span class="nx">onMapMoveEnd_</span><span class="p">();</span>
+  <span class="p">});</span>
+
+  <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="s">&#39;idle&#39;</span><span class="p">,</span> <span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">me</span><span class="p">.</span><span class="nx">onMapMoveEnd_</span><span class="p">();</span>
+  <span class="p">});</span>
+
+  <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="s">&#39;zoom_changed&#39;</span><span class="p">,</span> <span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">me</span><span class="p">.</span><span class="nx">onMapMoveEnd_</span><span class="p">();</span>
+  <span class="p">});</span>
+
+
+
+  <span class="o">/**</span>
+   <span class="o">*</span> <span class="nx">This</span> <span class="nx">closure</span> <span class="nx">provide</span> <span class="nx">easy</span> <span class="nx">access</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">map</span><span class="p">.</span>
+   <span class="o">*</span> <span class="nx">They</span> <span class="nx">are</span> <span class="nx">used</span> <span class="nx">as</span> <span class="nx">callbacks</span><span class="p">,</span> <span class="o">not</span> <span class="nx">as</span> <span class="nx">methods</span><span class="p">.</span>
+   <span class="o">*</span> <span class="nx">@param</span> <span class="nx">GMarker</span> <span class="nx">marker</span> <span class="nx">Marker</span> <span class="nx">to</span> <span class="nx">be</span> <span class="nx">removed</span> <span class="nx">from</span> <span class="nx">the</span> <span class="nx">map</span>
+   <span class="o">*</span> <span class="nx">@private</span>
+   <span class="o">*/</span>
+  <span class="nv">me.removeOverlay_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">marker</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">marker</span><span class="p">.</span><span class="nx">setMap</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+    <span class="nx">me</span><span class="p">.</span><span class="nx">shownMarkers_</span><span class="o">--</span><span class="p">;</span>
+  <span class="p">};</span>
+
+  <span class="o">/**</span>
+   <span class="o">*</span> <span class="nx">This</span> <span class="nx">closure</span> <span class="nx">provide</span> <span class="nx">easy</span> <span class="nx">access</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">map</span><span class="p">.</span>
+   <span class="o">*</span> <span class="nx">They</span> <span class="nx">are</span> <span class="nx">used</span> <span class="nx">as</span> <span class="nx">callbacks</span><span class="p">,</span> <span class="o">not</span> <span class="nx">as</span> <span class="nx">methods</span><span class="p">.</span>
+   <span class="o">*</span> <span class="nx">@param</span> <span class="nx">GMarker</span> <span class="nx">marker</span> <span class="nx">Marker</span> <span class="nx">to</span> <span class="nx">be</span> <span class="nx">added</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">map</span>
+   <span class="o">*</span> <span class="nx">@private</span>
+   <span class="o">*/</span>
+  <span class="nv">me.addOverlay_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">marker</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">me</span><span class="p">.</span><span class="nx">show_</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">marker</span><span class="p">.</span><span class="nx">setMap</span><span class="p">(</span><span class="nx">me</span><span class="p">.</span><span class="nx">map_</span><span class="p">);</span>
+      <span class="nx">me</span><span class="p">.</span><span class="nx">shownMarkers_</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+
+  <span class="nx">me</span><span class="p">.</span><span class="nx">resetManager_</span><span class="p">();</span>
+  <span class="nv">me.shownMarkers_ = </span><span class="mi">0</span><span class="p">;</span>
+
+  <span class="nv">me.shownBounds_ = </span><span class="nx">me</span><span class="p">.</span><span class="nx">getMapGridBounds_</span><span class="p">();</span>
+
+  <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="nx">me</span><span class="p">,</span> <span class="s">&#39;loaded&#39;</span><span class="p">);</span>
+
+<span class="p">};</span>
+
+<span class="o">/**</span>
+ <span class="o">*</span>  <span class="nx">Default</span> <span class="nx">tile</span> <span class="nx">size</span> <span class="nx">used</span> <span class="k">for</span> <span class="nx">deviding</span> <span class="nx">the</span> <span class="nx">map</span> <span class="nx">into</span> <span class="nx">a</span> <span class="nx">grid</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.DEFAULT_TILE_SIZE_ = </span><span class="mi">1024</span><span class="p">;</span>
+
+<span class="o">/*</span>
+ <span class="o">*</span>  <span class="nx">How</span> <span class="nx">much</span> <span class="nx">extra</span> <span class="nx">space</span> <span class="nx">to</span> <span class="nx">show</span> <span class="nx">around</span> <span class="nx">the</span> <span class="nx">map</span> <span class="nx">border</span> <span class="nx">so</span>
+ <span class="o">*</span>  <span class="nx">dragging</span> <span class="nx">doesn</span><span class="s">&#39;t result in an empty place.</span>
+<span class="s"> */</span>
+<span class="s">MarkerManager.DEFAULT_BORDER_PADDING_ = 100;</span>
+
+<span class="s">/**</span>
+<span class="s"> *  Default tilesize of single tile world.</span>
+<span class="s"> */</span>
+<span class="s">MarkerManager.MERCATOR_ZOOM_LEVEL_ZERO_RANGE = 256;</span>
+
+
+<span class="s">/**</span>
+<span class="s"> * Initializes MarkerManager arrays for all zoom levels</span>
+<span class="s"> * Called by constructor and by clearAllMarkers</span>
+<span class="s"> */</span>
+<span class="s">MarkerManager.prototype.resetManager_ = function () {</span>
+<span class="s">  var mapWidth = MarkerManager.MERCATOR_ZOOM_LEVEL_ZERO_RANGE;</span>
+<span class="s">  for (var zoom = 0; zoom &lt;= this.maxZoom_; ++zoom) {</span>
+<span class="s">    this.grid_[zoom] = {};</span>
+<span class="s">    this.numMarkers_[zoom] = 0;</span>
+<span class="s">    this.gridWidth_[zoom] = Math.ceil(mapWidth / this.tileSize_);</span>
+<span class="s">    mapWidth &lt;&lt;= 1;</span>
+<span class="s">  }</span>
+
+<span class="s">};</span>
+
+<span class="s">/**</span>
+<span class="s"> * Removes all markers in the manager, and</span>
+<span class="s"> * removes any visible markers from the map.</span>
+<span class="s"> */</span>
+<span class="s">MarkerManager.prototype.clearMarkers = function () {</span>
+<span class="s">  this.processAll_(this.shownBounds_, this.removeOverlay_);</span>
+<span class="s">  this.resetManager_();</span>
+<span class="s">};</span>
+
+
+<span class="s">/**</span>
+<span class="s"> * Gets the tile coordinate for a given latlng point.</span>
+<span class="s"> *</span>
+<span class="s"> * @param {LatLng} latlng The geographical point.</span>
+<span class="s"> * @param {Number} zoom The zoom level.</span>
+<span class="s"> * @param {google.maps.Size} padding The padding used to shift the pixel coordinate.</span>
+<span class="s"> *               Used for expanding a bounds to include an extra padding</span>
+<span class="s"> *               of pixels surrounding the bounds.</span>
+<span class="s"> * @return {GPoint} The point in tile coordinates.</span>
+<span class="s"> *</span>
+<span class="s"> */</span>
+<span class="s">MarkerManager.prototype.getTilePoint_ = function (latlng, zoom, padding) {</span>
+
+<span class="s">  var pixelPoint = this.projectionHelper_.LatLngToPixel(latlng, zoom);</span>
+
+<span class="s">  var point = new google.maps.Point(</span>
+<span class="s">    Math.floor((pixelPoint.x + padding.width) / this.tileSize_),</span>
+<span class="s">    Math.floor((pixelPoint.y + padding.height) / this.tileSize_)</span>
+<span class="s">  );</span>
+
+<span class="s">  return point;</span>
+<span class="s">};</span>
+
+
+<span class="s">/**</span>
+<span class="s"> * Finds the appropriate place to add the marker to the grid.</span>
+<span class="s"> * Optimized for speed; does not actually add the marker to the map.</span>
+<span class="s"> * Designed for batch-processing thousands of markers.</span>
+<span class="s"> *</span>
+<span class="s"> * @param {Marker} marker The marker to add.</span>
+<span class="s"> * @param {Number} minZoom The minimum zoom for displaying the marker.</span>
+<span class="s"> * @param {Number} maxZoom The maximum zoom for displaying the marker.</span>
+<span class="s"> */</span>
+<span class="s">MarkerManager.prototype.addMarkerBatch_ = function (marker, minZoom, maxZoom) {</span>
+<span class="s">  var me = this;</span>
+
+<span class="s">  var mPoint = marker.getPosition();</span>
+<span class="s">  marker.MarkerManager_minZoom = minZoom;</span>
+
+
+<span class="s">  // Tracking markers is expensive, so we do this only if the</span>
+<span class="s">  // user explicitly requested it when creating marker manager.</span>
+<span class="s">  if (this.trackMarkers_) {</span>
+<span class="s">    google.maps.event.addListener(marker, &#39;</span><span class="nx">changed</span><span class="s">&#39;, function (a, b, c) {</span>
+<span class="s">      me.onMarkerMoved_(a, b, c);</span>
+<span class="s">    });</span>
+<span class="s">  }</span>
+
+<span class="s">  var gridPoint = this.getTilePoint_(mPoint, maxZoom, new google.maps.Size(0, 0, 0, 0));</span>
+
+<span class="s">  for (var zoom = maxZoom; zoom &gt;= minZoom; zoom--) {</span>
+<span class="s">    var cell = this.getGridCellCreate_(gridPoint.x, gridPoint.y, zoom);</span>
+<span class="s">    cell.push(marker);</span>
+
+<span class="s">    gridPoint.x = gridPoint.x &gt;&gt; 1;</span>
+<span class="s">    gridPoint.y = gridPoint.y &gt;&gt; 1;</span>
+<span class="s">  }</span>
+<span class="s">};</span>
+
+
+<span class="s">/**</span>
+<span class="s"> * Returns whether or not the given point is visible in the shown bounds. This</span>
+<span class="s"> * is a helper method that takes care of the corner case, when shownBounds have</span>
+<span class="s"> * negative minX value.</span>
+<span class="s"> *</span>
+<span class="s"> * @param {Point} point a point on a grid.</span>
+<span class="s"> * @return {Boolean} Whether or not the given point is visible in the currently</span>
+<span class="s"> * shown bounds.</span>
+<span class="s"> */</span>
+<span class="s">MarkerManager.prototype.isGridPointVisible_ = function (point) {</span>
+<span class="s">  var vertical = this.shownBounds_.minY &lt;= point.y &amp;&amp;</span>
+<span class="s">      point.y &lt;= this.shownBounds_.maxY;</span>
+<span class="s">  var minX = this.shownBounds_.minX;</span>
+<span class="s">  var horizontal = minX &lt;= point.x &amp;&amp; point.x &lt;= this.shownBounds_.maxX;</span>
+<span class="s">  if (!horizontal &amp;&amp; minX &lt; 0) {</span>
+<span class="s">    // Shifts the negative part of the rectangle. As point.x is always less</span>
+<span class="s">    // than grid width, only test shifted minX .. 0 part of the shown bounds.</span>
+<span class="s">    var width = this.gridWidth_[this.shownBounds_.z];</span>
+<span class="s">    horizontal = minX + width &lt;= point.x &amp;&amp; point.x &lt;= width - 1;</span>
+<span class="s">  }</span>
+<span class="s">  return vertical &amp;&amp; horizontal;</span>
+<span class="s">};</span>
+
+
+<span class="s">/**</span>
+<span class="s"> * Reacts to a notification from a marker that it has moved to a new location.</span>
+<span class="s"> * It scans the grid all all zoom levels and moves the marker from the old grid</span>
+<span class="s"> * location to a new grid location.</span>
+<span class="s"> *</span>
+<span class="s"> * @param {Marker} marker The marker that moved.</span>
+<span class="s"> * @param {LatLng} oldPoint The old position of the marker.</span>
+<span class="s"> * @param {LatLng} newPoint The new position of the marker.</span>
+<span class="s"> */</span>
+<span class="s">MarkerManager.prototype.onMarkerMoved_ = function (marker, oldPoint, newPoint) {</span>
+<span class="s">  // NOTE: We do not know the minimum or maximum zoom the marker was</span>
+<span class="s">  // added at, so we start at the absolute maximum. Whenever we successfully</span>
+<span class="s">  // remove a marker at a given zoom, we add it at the new grid coordinates.</span>
+<span class="s">  var zoom = this.maxZoom_;</span>
+<span class="s">  var changed = false;</span>
+<span class="s">  var oldGrid = this.getTilePoint_(oldPoint, zoom, new google.maps.Size(0, 0, 0, 0));</span>
+<span class="s">  var newGrid = this.getTilePoint_(newPoint, zoom, new google.maps.Size(0, 0, 0, 0));</span>
+<span class="s">  while (zoom &gt;= 0 &amp;&amp; (oldGrid.x !== newGrid.x || oldGrid.y !== newGrid.y)) {</span>
+<span class="s">    var cell = this.getGridCellNoCreate_(oldGrid.x, oldGrid.y, zoom);</span>
+<span class="s">    if (cell) {</span>
+<span class="s">      if (this.removeFromArray_(cell, marker)) {</span>
+<span class="s">        this.getGridCellCreate_(newGrid.x, newGrid.y, zoom).push(marker);</span>
+<span class="s">      }</span>
+<span class="s">    }</span>
+<span class="s">    // For the current zoom we also need to update the map. Markers that no</span>
+<span class="s">    // longer are visible are removed from the map. Markers that moved into</span>
+<span class="s">    // the shown bounds are added to the map. This also lets us keep the count</span>
+<span class="s">    // of visible markers up to date.</span>
+<span class="s">    if (zoom === this.mapZoom_) {</span>
+<span class="s">      if (this.isGridPointVisible_(oldGrid)) {</span>
+<span class="s">        if (!this.isGridPointVisible_(newGrid)) {</span>
+<span class="s">          this.removeOverlay_(marker);</span>
+<span class="s">          changed = true;</span>
+<span class="s">        }</span>
+<span class="s">      } else {</span>
+<span class="s">        if (this.isGridPointVisible_(newGrid)) {</span>
+<span class="s">          this.addOverlay_(marker);</span>
+<span class="s">          changed = true;</span>
+<span class="s">        }</span>
+<span class="s">      }</span>
+<span class="s">    }</span>
+<span class="s">    oldGrid.x = oldGrid.x &gt;&gt; 1;</span>
+<span class="s">    oldGrid.y = oldGrid.y &gt;&gt; 1;</span>
+<span class="s">    newGrid.x = newGrid.x &gt;&gt; 1;</span>
+<span class="s">    newGrid.y = newGrid.y &gt;&gt; 1;</span>
+<span class="s">    --zoom;</span>
+<span class="s">  }</span>
+<span class="s">  if (changed) {</span>
+<span class="s">    this.notifyListeners_();</span>
+<span class="s">  }</span>
+<span class="s">};</span>
+
+
+<span class="s">/**</span>
+<span class="s"> * Removes marker from the manager and from the map</span>
+<span class="s"> * (if it&#39;</span><span class="nx">s</span> <span class="nx">currently</span> <span class="nx">visible</span><span class="p">).</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">GMarker</span><span class="p">}</span> <span class="nx">marker</span> <span class="nx">The</span> <span class="nx">marker</span> <span class="nx">to</span> <span class="k">delete</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.removeMarker = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">marker</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">zoom = </span><span class="k">this</span><span class="p">.</span><span class="nx">maxZoom_</span><span class="p">;</span>
+  <span class="nx">var</span> <span class="nv">changed = </span><span class="kc">false</span><span class="p">;</span>
+  <span class="nx">var</span> <span class="nv">point = </span><span class="nx">marker</span><span class="p">.</span><span class="nx">getPosition</span><span class="p">();</span>
+  <span class="nx">var</span> <span class="nv">grid = </span><span class="k">this</span><span class="p">.</span><span class="nx">getTilePoint_</span><span class="p">(</span><span class="nx">point</span><span class="p">,</span> <span class="nx">zoom</span><span class="p">,</span> <span class="k">new</span> <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">Size</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">));</span>
+  <span class="k">while</span> <span class="p">(</span><span class="nx">zoom</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">var</span> <span class="nv">cell = </span><span class="k">this</span><span class="p">.</span><span class="nx">getGridCellNoCreate_</span><span class="p">(</span><span class="nx">grid</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">grid</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">zoom</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">cell</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">removeFromArray_</span><span class="p">(</span><span class="nx">cell</span><span class="p">,</span> <span class="nx">marker</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="o">//</span> <span class="nx">For</span> <span class="nx">the</span> <span class="nx">current</span> <span class="nx">zoom</span> <span class="nx">we</span> <span class="nx">also</span> <span class="nx">need</span> <span class="nx">to</span> <span class="nx">update</span> <span class="nx">the</span> <span class="nx">map</span><span class="p">.</span> <span class="nx">Markers</span> <span class="nx">that</span> <span class="kc">no</span>
+    <span class="o">//</span> <span class="nx">longer</span> <span class="nx">are</span> <span class="nx">visible</span> <span class="nx">are</span> <span class="nx">removed</span> <span class="nx">from</span> <span class="nx">the</span> <span class="nx">map</span><span class="p">.</span> <span class="nx">This</span> <span class="nx">also</span> <span class="nx">lets</span> <span class="nx">us</span> <span class="nx">keep</span> <span class="nx">the</span> <span class="nx">count</span>
+    <span class="o">//</span> <span class="k">of</span> <span class="nx">visible</span> <span class="nx">markers</span> <span class="nx">up</span> <span class="nx">to</span> <span class="nx">date</span><span class="p">.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">zoom</span> <span class="o">===</span> <span class="k">this</span><span class="p">.</span><span class="nx">mapZoom_</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">isGridPointVisible_</span><span class="p">(</span><span class="nx">grid</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">removeOverlay_</span><span class="p">(</span><span class="nx">marker</span><span class="p">);</span>
+        <span class="nv">changed = </span><span class="kc">true</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="nv">grid.x = </span><span class="nx">grid</span><span class="p">.</span><span class="nx">x</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="nv">grid.y = </span><span class="nx">grid</span><span class="p">.</span><span class="nx">y</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="o">--</span><span class="nx">zoom</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">changed</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">notifyListeners_</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">numMarkers_</span><span class="p">[</span><span class="nx">marker</span><span class="p">.</span><span class="nx">MarkerManager_minZoom</span><span class="p">]</span><span class="o">--</span><span class="p">;</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Add</span> <span class="nx">many</span> <span class="nx">markers</span> <span class="nx">at</span> <span class="nx">once</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">Does</span> <span class="o">not</span> <span class="nx">actually</span> <span class="nx">update</span> <span class="nx">the</span> <span class="nx">map</span><span class="p">,</span> <span class="nx">just</span> <span class="nx">the</span> <span class="nx">internal</span> <span class="nx">grid</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Array</span> <span class="k">of</span> <span class="nx">Marker</span><span class="p">}</span> <span class="nx">markers</span> <span class="nx">The</span> <span class="nx">markers</span> <span class="nx">to</span> <span class="nx">add</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">minZoom</span> <span class="nx">The</span> <span class="nx">minimum</span> <span class="nx">zoom</span> <span class="nx">level</span> <span class="nx">to</span> <span class="nx">display</span> <span class="nx">the</span> <span class="nx">markers</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">opt_maxZoom</span> <span class="nx">The</span> <span class="nx">maximum</span> <span class="nx">zoom</span> <span class="nx">level</span> <span class="nx">to</span> <span class="nx">display</span> <span class="nx">the</span> <span class="nx">markers</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.addMarkers = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">markers</span><span class="p">,</span> <span class="nx">minZoom</span><span class="p">,</span> <span class="nx">opt_maxZoom</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">maxZoom = </span><span class="k">this</span><span class="p">.</span><span class="nx">getOptMaxZoom_</span><span class="p">(</span><span class="nx">opt_maxZoom</span><span class="p">);</span>
+  <span class="k">for</span> <span class="p">(</span><span class="nx">var</span> <span class="nv">i = </span><span class="nx">markers</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">--</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">addMarkerBatch_</span><span class="p">(</span><span class="nx">markers</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">minZoom</span><span class="p">,</span> <span class="nx">maxZoom</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">this</span><span class="p">.</span><span class="nx">numMarkers_</span><span class="p">[</span><span class="nx">minZoom</span><span class="p">]</span> <span class="o">+=</span> <span class="nx">markers</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Returns</span> <span class="nx">the</span> <span class="nx">value</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">optional</span> <span class="nx">maximum</span> <span class="nx">zoom</span><span class="p">.</span> <span class="nx">This</span> <span class="nx">method</span> <span class="o">is</span> <span class="nx">defined</span> <span class="nx">so</span>
+ <span class="o">*</span> <span class="nx">that</span> <span class="nx">we</span> <span class="nx">have</span> <span class="nx">just</span> <span class="nx">one</span> <span class="nx">place</span> <span class="nx">where</span> <span class="nx">optional</span> <span class="nx">maximum</span> <span class="nx">zoom</span> <span class="o">is</span> <span class="nx">calculated</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">opt_maxZoom</span> <span class="nx">The</span> <span class="nx">optinal</span> <span class="nx">maximum</span> <span class="nx">zoom</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@</span><span class="k">return</span> <span class="nx">The</span> <span class="nx">maximum</span> <span class="nx">zoom</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.getOptMaxZoom_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">opt_maxZoom</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">opt_maxZoom</span> <span class="o">||</span> <span class="k">this</span><span class="p">.</span><span class="nx">maxZoom_</span><span class="p">;</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Calculates</span> <span class="nx">the</span> <span class="nx">total</span> <span class="nx">number</span> <span class="k">of</span> <span class="nx">markers</span> <span class="nx">potentially</span> <span class="nx">visible</span> <span class="nx">at</span> <span class="nx">a</span> <span class="nx">given</span>
+ <span class="o">*</span> <span class="nx">zoom</span> <span class="nx">level</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">zoom</span> <span class="nx">The</span> <span class="nx">zoom</span> <span class="nx">level</span> <span class="nx">to</span> <span class="nx">check</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.getMarkerCount = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">zoom</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">total = </span><span class="mi">0</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="nx">var</span> <span class="nv">z = </span><span class="mi">0</span><span class="p">;</span> <span class="nx">z</span> <span class="o">&lt;=</span> <span class="nx">zoom</span><span class="p">;</span> <span class="nx">z</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">total</span> <span class="o">+=</span> <span class="k">this</span><span class="p">.</span><span class="nx">numMarkers_</span><span class="p">[</span><span class="nx">z</span><span class="p">];</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">total</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Returns</span> <span class="nx">a</span> <span class="nx">marker</span> <span class="nx">given</span> <span class="nx">latitude</span><span class="p">,</span> <span class="nx">longitude</span> <span class="o">and</span> <span class="nx">zoom</span><span class="p">.</span> <span class="nx">If</span> <span class="nx">the</span> <span class="nx">marker</span> <span class="nx">does</span> <span class="o">not</span>
+ <span class="o">*</span> <span class="nx">exist</span><span class="p">,</span> <span class="nx">the</span> <span class="nx">method</span> <span class="nx">will</span> <span class="k">return</span> <span class="nx">a</span> <span class="k">new</span> <span class="nx">marker</span><span class="p">.</span> <span class="nx">If</span> <span class="nx">a</span> <span class="k">new</span> <span class="nx">marker</span> <span class="o">is</span> <span class="nx">created</span><span class="p">,</span>
+ <span class="o">*</span> <span class="nx">it</span> <span class="nx">will</span> <span class="nx">NOT</span> <span class="nx">be</span> <span class="nx">added</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">manager</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">lat</span> <span class="o">-</span> <span class="nx">the</span> <span class="nx">latitude</span> <span class="k">of</span> <span class="nx">a</span> <span class="nx">marker</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">lng</span> <span class="o">-</span> <span class="nx">the</span> <span class="nx">longitude</span> <span class="k">of</span> <span class="nx">a</span> <span class="nx">marker</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">zoom</span> <span class="o">-</span> <span class="nx">the</span> <span class="nx">zoom</span> <span class="nx">level</span>
+ <span class="o">*</span> <span class="nx">@</span><span class="k">return</span> <span class="p">{</span><span class="nx">GMarker</span><span class="p">}</span> <span class="nx">marker</span> <span class="o">-</span> <span class="nx">the</span> <span class="nx">marker</span> <span class="nx">found</span> <span class="nx">at</span> <span class="nx">lat</span> <span class="o">and</span> <span class="nx">lng</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.getMarker = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">lat</span><span class="p">,</span> <span class="nx">lng</span><span class="p">,</span> <span class="nx">zoom</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">mPoint = </span><span class="k">new</span> <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">LatLng</span><span class="p">(</span><span class="nx">lat</span><span class="p">,</span> <span class="nx">lng</span><span class="p">);</span>
+  <span class="nx">var</span> <span class="nv">gridPoint = </span><span class="k">this</span><span class="p">.</span><span class="nx">getTilePoint_</span><span class="p">(</span><span class="nx">mPoint</span><span class="p">,</span> <span class="nx">zoom</span><span class="p">,</span> <span class="k">new</span> <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">Size</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">));</span>
+
+  <span class="nx">var</span> <span class="nv">marker = </span><span class="k">new</span> <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">Marker</span><span class="p">({</span><span class="nv">position: </span><span class="nx">mPoint</span><span class="p">});</span>
+
+  <span class="nx">var</span> <span class="nv">cellArray = </span><span class="k">this</span><span class="p">.</span><span class="nx">getGridCellNoCreate_</span><span class="p">(</span><span class="nx">gridPoint</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">gridPoint</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">zoom</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">cellArray</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nx">var</span> <span class="nv">i = </span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">cellArray</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">lat</span> <span class="o">===</span> <span class="nx">cellArray</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">getPosition</span><span class="p">().</span><span class="nx">lat</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="nx">lng</span> <span class="o">===</span> <span class="nx">cellArray</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">getPosition</span><span class="p">().</span><span class="nx">lng</span><span class="p">())</span> <span class="p">{</span>
+        <span class="nv">marker = </span><span class="nx">cellArray</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">marker</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Add</span> <span class="nx">a</span> <span class="nx">single</span> <span class="nx">marker</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">map</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">Marker</span><span class="p">}</span> <span class="nx">marker</span> <span class="nx">The</span> <span class="nx">marker</span> <span class="nx">to</span> <span class="nx">add</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">minZoom</span> <span class="nx">The</span> <span class="nx">minimum</span> <span class="nx">zoom</span> <span class="nx">level</span> <span class="nx">to</span> <span class="nx">display</span> <span class="nx">the</span> <span class="nx">marker</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">opt_maxZoom</span> <span class="nx">The</span> <span class="nx">maximum</span> <span class="nx">zoom</span> <span class="nx">level</span> <span class="nx">to</span> <span class="nx">display</span> <span class="nx">the</span> <span class="nx">marker</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.addMarker = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">marker</span><span class="p">,</span> <span class="nx">minZoom</span><span class="p">,</span> <span class="nx">opt_maxZoom</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">maxZoom = </span><span class="k">this</span><span class="p">.</span><span class="nx">getOptMaxZoom_</span><span class="p">(</span><span class="nx">opt_maxZoom</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">addMarkerBatch_</span><span class="p">(</span><span class="nx">marker</span><span class="p">,</span> <span class="nx">minZoom</span><span class="p">,</span> <span class="nx">maxZoom</span><span class="p">);</span>
+  <span class="nx">var</span> <span class="nv">gridPoint = </span><span class="k">this</span><span class="p">.</span><span class="nx">getTilePoint_</span><span class="p">(</span><span class="nx">marker</span><span class="p">.</span><span class="nx">getPosition</span><span class="p">(),</span> <span class="k">this</span><span class="p">.</span><span class="nx">mapZoom_</span><span class="p">,</span> <span class="k">new</span> <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">Size</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">));</span>
+  <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">isGridPointVisible_</span><span class="p">(</span><span class="nx">gridPoint</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+      <span class="nx">minZoom</span> <span class="o">&lt;=</span> <span class="k">this</span><span class="p">.</span><span class="nx">shownBounds_</span><span class="p">.</span><span class="nx">z</span> <span class="o">&amp;&amp;</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">shownBounds_</span><span class="p">.</span><span class="nx">z</span> <span class="o">&lt;=</span> <span class="nx">maxZoom</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">addOverlay_</span><span class="p">(</span><span class="nx">marker</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">notifyListeners_</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">numMarkers_</span><span class="p">[</span><span class="nx">minZoom</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Helper</span> <span class="k">class</span> <span class="nx">to</span> <span class="nx">create</span> <span class="nx">a</span> <span class="nx">bounds</span> <span class="k">of</span> <span class="nx">INT</span> <span class="nx">ranges</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="nx">bounds</span> <span class="nb">Array</span><span class="p">.</span><span class="o">&lt;</span><span class="nb">Object</span><span class="p">.</span><span class="o">&lt;</span><span class="nx">string</span><span class="p">,</span> <span class="nx">number</span><span class="o">&gt;&gt;</span> <span class="nx">Bounds</span> <span class="nx">object</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@constructor</span>
+ <span class="o">*/</span>
+<span class="nx">function</span> <span class="nx">GridBounds</span><span class="p">(</span><span class="nx">bounds</span><span class="p">)</span> <span class="p">{</span>
+  <span class="o">//</span> <span class="p">[</span><span class="nx">sw</span><span class="p">,</span> <span class="nx">ne</span><span class="p">]</span>
+
+  <span class="k">this</span><span class="p">.</span><span class="nv">minX = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">min</span><span class="p">(</span><span class="nx">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">x</span><span class="p">,</span> <span class="nx">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">x</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nv">maxX = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span><span class="nx">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">x</span><span class="p">,</span> <span class="nx">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">x</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nv">minY = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">min</span><span class="p">(</span><span class="nx">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">y</span><span class="p">,</span> <span class="nx">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">y</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nv">maxY = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span><span class="nx">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">y</span><span class="p">,</span> <span class="nx">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">y</span><span class="p">);</span>
+
+<span class="p">}</span>
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Returns</span> <span class="kc">true</span> <span class="k">if</span> <span class="k">this</span> <span class="nx">bounds</span> <span class="nx">equal</span> <span class="nx">the</span> <span class="nx">given</span> <span class="nx">bounds</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">GridBounds</span><span class="p">}</span> <span class="nx">gridBounds</span> <span class="nx">GridBounds</span> <span class="nx">The</span> <span class="nx">bounds</span> <span class="nx">to</span> <span class="nx">test</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@</span><span class="k">return</span> <span class="p">{</span><span class="nb">Boolean</span><span class="p">}</span> <span class="nx">This</span> <span class="nx">Bounds</span> <span class="nx">equals</span> <span class="nx">the</span> <span class="nx">given</span> <span class="nx">GridBounds</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">GridBounds.prototype.equals = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">gridBounds</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">maxX</span> <span class="o">===</span> <span class="nx">gridBounds</span><span class="p">.</span><span class="nx">maxX</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">maxY</span> <span class="o">===</span> <span class="nx">gridBounds</span><span class="p">.</span><span class="nx">maxY</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">minX</span> <span class="o">===</span> <span class="nx">gridBounds</span><span class="p">.</span><span class="nx">minX</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">minY</span> <span class="o">===</span> <span class="nx">gridBounds</span><span class="p">.</span><span class="nx">minY</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Returns</span> <span class="kc">true</span> <span class="k">if</span> <span class="k">this</span> <span class="nx">bounds</span> <span class="p">(</span><span class="nx">inclusively</span><span class="p">)</span> <span class="nx">contains</span> <span class="nx">the</span> <span class="nx">given</span> <span class="nx">point</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">Point</span><span class="p">}</span> <span class="nx">point</span>  <span class="nx">The</span> <span class="nx">point</span> <span class="nx">to</span> <span class="nx">test</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@</span><span class="k">return</span> <span class="p">{</span><span class="nb">Boolean</span><span class="p">}</span> <span class="nx">This</span> <span class="nx">Bounds</span> <span class="nx">contains</span> <span class="nx">the</span> <span class="nx">given</span> <span class="nx">Point</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">GridBounds.prototype.containsPoint = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">point</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">outer = </span><span class="k">this</span><span class="p">;</span>
+  <span class="k">return</span> <span class="p">(</span><span class="nx">outer</span><span class="p">.</span><span class="nx">minX</span> <span class="o">&lt;=</span> <span class="nx">point</span><span class="p">.</span><span class="nx">x</span> <span class="o">&amp;&amp;</span> <span class="nx">outer</span><span class="p">.</span><span class="nx">maxX</span> <span class="o">&gt;=</span> <span class="nx">point</span><span class="p">.</span><span class="nx">x</span> <span class="o">&amp;&amp;</span> <span class="nx">outer</span><span class="p">.</span><span class="nx">minY</span> <span class="o">&lt;=</span> <span class="nx">point</span><span class="p">.</span><span class="nx">y</span> <span class="o">&amp;&amp;</span> <span class="nx">outer</span><span class="p">.</span><span class="nx">maxY</span> <span class="o">&gt;=</span> <span class="nx">point</span><span class="p">.</span><span class="nx">y</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Get</span> <span class="nx">a</span> <span class="nx">cell</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">grid</span><span class="p">,</span> <span class="nx">creating</span> <span class="nx">it</span> <span class="nx">first</span> <span class="k">if</span> <span class="nx">necessary</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">Optimization</span> <span class="nx">candidate</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">x</span> <span class="nx">The</span> <span class="nx">x</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">y</span> <span class="nx">The</span> <span class="nx">y</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">z</span> <span class="nx">The</span> <span class="nx">z</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@</span><span class="k">return</span> <span class="p">{</span><span class="nb">Array</span><span class="p">}</span> <span class="nx">The</span> <span class="nx">cell</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">array</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.getGridCellCreate_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">grid = </span><span class="k">this</span><span class="p">.</span><span class="nx">grid_</span><span class="p">[</span><span class="nx">z</span><span class="p">];</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">x</span> <span class="o">+=</span> <span class="k">this</span><span class="p">.</span><span class="nx">gridWidth_</span><span class="p">[</span><span class="nx">z</span><span class="p">];</span>
+  <span class="p">}</span>
+  <span class="nx">var</span> <span class="nv">gridCol = </span><span class="nx">grid</span><span class="p">[</span><span class="nx">x</span><span class="p">];</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">gridCol</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">gridCol = </span><span class="nx">grid</span><span class="p">[</span><span class="nx">x</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">gridCol</span><span class="p">[</span><span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]);</span>
+  <span class="p">}</span>
+  <span class="nx">var</span> <span class="nv">gridCell = </span><span class="nx">gridCol</span><span class="p">[</span><span class="nx">y</span><span class="p">];</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">gridCell</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">gridCol</span><span class="p">[</span><span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]);</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">gridCell</span><span class="p">;</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Get</span> <span class="nx">a</span> <span class="nx">cell</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">grid</span><span class="p">,</span> <span class="nx">returning</span> <span class="kc">undefined</span> <span class="k">if</span> <span class="nx">it</span> <span class="nx">does</span> <span class="o">not</span> <span class="nx">exist</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nv">NOTE: </span><span class="nx">Optimized</span> <span class="k">for</span> <span class="nx">speed</span> <span class="o">--</span> <span class="nx">otherwise</span> <span class="nx">could</span> <span class="nx">combine</span> <span class="nx">with</span> <span class="nx">getGridCellCreate_</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">x</span> <span class="nx">The</span> <span class="nx">x</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">y</span> <span class="nx">The</span> <span class="nx">y</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">z</span> <span class="nx">The</span> <span class="nx">z</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@</span><span class="k">return</span> <span class="p">{</span><span class="nb">Array</span><span class="p">}</span> <span class="nx">The</span> <span class="nx">cell</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">array</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.getGridCellNoCreate_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">grid = </span><span class="k">this</span><span class="p">.</span><span class="nx">grid_</span><span class="p">[</span><span class="nx">z</span><span class="p">];</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="nx">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">x</span> <span class="o">+=</span> <span class="k">this</span><span class="p">.</span><span class="nx">gridWidth_</span><span class="p">[</span><span class="nx">z</span><span class="p">];</span>
+  <span class="p">}</span>
+  <span class="nx">var</span> <span class="nv">gridCol = </span><span class="nx">grid</span><span class="p">[</span><span class="nx">x</span><span class="p">];</span>
+  <span class="k">return</span> <span class="nx">gridCol</span> <span class="o">?</span> <span class="nx">gridCol</span><span class="p">[</span><span class="nx">y</span><span class="p">]</span> <span class="o">:</span> <span class="kc">undefined</span><span class="p">;</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Turns</span> <span class="nx">at</span> <span class="nx">geographical</span> <span class="nx">bounds</span> <span class="nx">into</span> <span class="nx">a</span> <span class="nx">grid</span><span class="o">-</span><span class="nx">space</span> <span class="nx">bounds</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">LatLngBounds</span><span class="p">}</span> <span class="nx">bounds</span> <span class="nx">The</span> <span class="nx">geographical</span> <span class="nx">bounds</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">zoom</span> <span class="nx">The</span> <span class="nx">zoom</span> <span class="nx">level</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">bounds</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">Size</span><span class="p">}</span> <span class="nx">swPadding</span> <span class="nx">The</span> <span class="nx">padding</span> <span class="k">in</span> <span class="nx">pixels</span> <span class="nx">to</span> <span class="nx">extend</span> <span class="nx">beyond</span> <span class="nx">the</span>
+ <span class="o">*</span> <span class="nx">given</span> <span class="nx">bounds</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">Size</span><span class="p">}</span> <span class="nx">nePadding</span> <span class="nx">The</span> <span class="nx">padding</span> <span class="k">in</span> <span class="nx">pixels</span> <span class="nx">to</span> <span class="nx">extend</span> <span class="nx">beyond</span> <span class="nx">the</span>
+ <span class="o">*</span> <span class="nx">given</span> <span class="nx">bounds</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@</span><span class="k">return</span> <span class="p">{</span><span class="nx">GridBounds</span><span class="p">}</span> <span class="nx">The</span> <span class="nx">bounds</span> <span class="k">in</span> <span class="nx">grid</span> <span class="nx">space</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.getGridBounds_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">bounds</span><span class="p">,</span> <span class="nx">zoom</span><span class="p">,</span> <span class="nx">swPadding</span><span class="p">,</span> <span class="nx">nePadding</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nv">zoom = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">min</span><span class="p">(</span><span class="nx">zoom</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">maxZoom_</span><span class="p">);</span>
+
+  <span class="nx">var</span> <span class="nv">bl = </span><span class="nx">bounds</span><span class="p">.</span><span class="nx">getSouthWest</span><span class="p">();</span>
+  <span class="nx">var</span> <span class="nv">tr = </span><span class="nx">bounds</span><span class="p">.</span><span class="nx">getNorthEast</span><span class="p">();</span>
+  <span class="nx">var</span> <span class="nv">sw = </span><span class="k">this</span><span class="p">.</span><span class="nx">getTilePoint_</span><span class="p">(</span><span class="nx">bl</span><span class="p">,</span> <span class="nx">zoom</span><span class="p">,</span> <span class="nx">swPadding</span><span class="p">);</span>
+
+  <span class="nx">var</span> <span class="nv">ne = </span><span class="k">this</span><span class="p">.</span><span class="nx">getTilePoint_</span><span class="p">(</span><span class="nx">tr</span><span class="p">,</span> <span class="nx">zoom</span><span class="p">,</span> <span class="nx">nePadding</span><span class="p">);</span>
+  <span class="nx">var</span> <span class="nv">gw = </span><span class="k">this</span><span class="p">.</span><span class="nx">gridWidth_</span><span class="p">[</span><span class="nx">zoom</span><span class="p">];</span>
+
+  <span class="o">//</span> <span class="nx">Crossing</span> <span class="nx">the</span> <span class="nx">prime</span> <span class="nx">meridian</span> <span class="nx">requires</span> <span class="nx">correction</span> <span class="k">of</span> <span class="nx">bounds</span><span class="p">.</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">tr</span><span class="p">.</span><span class="nx">lng</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">bl</span><span class="p">.</span><span class="nx">lng</span><span class="p">()</span> <span class="o">||</span> <span class="nx">ne</span><span class="p">.</span><span class="nx">x</span> <span class="o">&lt;</span> <span class="nx">sw</span><span class="p">.</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">sw</span><span class="p">.</span><span class="nx">x</span> <span class="o">-=</span> <span class="nx">gw</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">ne</span><span class="p">.</span><span class="nx">x</span> <span class="o">-</span> <span class="nx">sw</span><span class="p">.</span><span class="nx">x</span>  <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;=</span> <span class="nx">gw</span><span class="p">)</span> <span class="p">{</span>
+    <span class="o">//</span> <span class="nx">Computed</span> <span class="nx">grid</span> <span class="nx">bounds</span> <span class="nx">are</span> <span class="nx">larger</span> <span class="nx">than</span> <span class="nx">the</span> <span class="nx">world</span><span class="p">;</span> <span class="nx">truncate</span><span class="p">.</span>
+    <span class="nv">sw.x = </span><span class="mi">0</span><span class="p">;</span>
+    <span class="nv">ne.x = </span><span class="nx">gw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="nx">var</span> <span class="nv">gridBounds = </span><span class="k">new</span> <span class="nx">GridBounds</span><span class="p">([</span><span class="nx">sw</span><span class="p">,</span> <span class="nx">ne</span><span class="p">]);</span>
+  <span class="nv">gridBounds.z = </span><span class="nx">zoom</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="nx">gridBounds</span><span class="p">;</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Gets</span> <span class="nx">the</span> <span class="nx">grid</span><span class="o">-</span><span class="nx">space</span> <span class="nx">bounds</span> <span class="k">for</span> <span class="nx">the</span> <span class="nx">current</span> <span class="nx">map</span> <span class="nx">viewport</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@</span><span class="k">return</span> <span class="p">{</span><span class="nx">Bounds</span><span class="p">}</span> <span class="nx">The</span> <span class="nx">bounds</span> <span class="k">in</span> <span class="nx">grid</span> <span class="nx">space</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.getMapGridBounds_ = </span><span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">getGridBounds_</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">map_</span><span class="p">.</span><span class="nx">getBounds</span><span class="p">(),</span> <span class="k">this</span><span class="p">.</span><span class="nx">mapZoom_</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">swPadding_</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">nePadding_</span><span class="p">);</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Event</span> <span class="nx">listener</span> <span class="k">for</span> <span class="nx">map</span><span class="o">:</span><span class="nx">movend</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nv">NOTE: </span><span class="nx">Use</span> <span class="nx">a</span> <span class="nx">timeout</span> <span class="nx">so</span> <span class="nx">that</span> <span class="nx">the</span> <span class="nx">user</span> <span class="o">is</span> <span class="o">not</span> <span class="nx">blocked</span>
+ <span class="o">*</span> <span class="nx">from</span> <span class="nx">moving</span> <span class="nx">the</span> <span class="nx">map</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">Removed</span> <span class="k">this</span> <span class="nx">because</span> <span class="nx">a</span> <span class="nx">a</span> <span class="nx">lack</span> <span class="k">of</span> <span class="nx">a</span> <span class="nx">scopy</span> <span class="nx">override</span><span class="o">/</span><span class="nx">callback</span> <span class="nx">function</span> <span class="kc">on</span> <span class="nx">events</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.onMapMoveEnd_ = </span><span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">objectSetTimeout_</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">updateMarkers_</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Call</span> <span class="nx">a</span> <span class="nx">function</span> <span class="o">or</span> <span class="nx">evaluate</span> <span class="nx">an</span> <span class="nx">expression</span> <span class="nx">after</span> <span class="nx">a</span> <span class="nx">specified</span> <span class="nx">number</span> <span class="k">of</span>
+ <span class="o">*</span> <span class="nx">milliseconds</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">Equivalent</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">standard</span> <span class="nb">window</span><span class="p">.</span><span class="nx">setTimeout</span> <span class="nx">function</span><span class="p">,</span> <span class="nx">but</span> <span class="nx">the</span> <span class="nx">given</span>
+ <span class="o">*</span> <span class="nx">function</span> <span class="nx">executes</span> <span class="nx">as</span> <span class="nx">a</span> <span class="nx">method</span> <span class="k">of</span> <span class="k">this</span> <span class="nx">instance</span><span class="p">.</span> <span class="nx">So</span> <span class="nx">the</span> <span class="nx">function</span> <span class="nx">passed</span> <span class="nx">to</span>
+ <span class="o">*</span> <span class="nx">objectSetTimeout</span> <span class="nx">can</span> <span class="nx">contain</span> <span class="nx">references</span> <span class="nx">to</span> <span class="k">this</span><span class="p">.</span>
+ <span class="o">*</span>    <span class="nx">objectSetTimeout</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">function</span> <span class="p">()</span> <span class="p">{</span> <span class="nx">alert</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">x</span><span class="p">)</span> <span class="p">},</span> <span class="mi">1000</span><span class="p">);</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Object</span><span class="p">}</span> <span class="nx">object</span>  <span class="nx">The</span> <span class="nx">target</span> <span class="nx">object</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Function</span><span class="p">}</span> <span class="nx">command</span>  <span class="nx">The</span> <span class="nx">command</span> <span class="nx">to</span> <span class="nx">run</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">milliseconds</span>  <span class="nx">The</span> <span class="nx">delay</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@</span><span class="k">return</span> <span class="p">{</span><span class="nb">Boolean</span><span class="p">}</span>  <span class="nx">Success</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.objectSetTimeout_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">object</span><span class="p">,</span> <span class="nx">command</span><span class="p">,</span> <span class="nx">milliseconds</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nb">window</span><span class="p">.</span><span class="nx">setTimeout</span><span class="p">(</span><span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">command</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">object</span><span class="p">);</span>
+  <span class="p">},</span> <span class="nx">milliseconds</span><span class="p">);</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Is</span> <span class="k">this</span> <span class="nx">layer</span> <span class="nx">visible</span><span class="o">?</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">Returns</span> <span class="nx">visibility</span> <span class="nx">setting</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@</span><span class="k">return</span> <span class="p">{</span><span class="nb">Boolean</span><span class="p">}</span> <span class="nx">Visible</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.visible = </span><span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">show_</span> <span class="o">?</span> <span class="kc">true</span> <span class="o">:</span> <span class="kc">false</span><span class="p">;</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Returns</span> <span class="kc">true</span> <span class="k">if</span> <span class="nx">the</span> <span class="nx">manager</span> <span class="o">is</span> <span class="nx">hidden</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">Otherwise</span> <span class="nx">returns</span> <span class="kc">false</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@</span><span class="k">return</span> <span class="p">{</span><span class="nb">Boolean</span><span class="p">}</span> <span class="nx">Hidden</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.isHidden = </span><span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">show_</span><span class="p">;</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Shows</span> <span class="nx">the</span> <span class="nx">manager</span> <span class="k">if</span> <span class="nx">it</span><span class="s">&#39;s currently hidden.</span>
+<span class="s"> */</span>
+<span class="s">MarkerManager.prototype.show = function () {</span>
+<span class="s">  this.show_ = true;</span>
+<span class="s">  this.refresh();</span>
+<span class="s">};</span>
+
+
+<span class="s">/**</span>
+<span class="s"> * Hides the manager if it&#39;</span><span class="nx">s</span> <span class="nx">currently</span> <span class="nx">visible</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.hide = </span><span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nv">show_ = </span><span class="kc">false</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">refresh</span><span class="p">();</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Toggles</span> <span class="nx">the</span> <span class="nx">visibility</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">manager</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.toggle = </span><span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nv">show_ = </span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">show_</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">refresh</span><span class="p">();</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Refresh</span> <span class="nx">forces</span> <span class="nx">the</span> <span class="nx">marker</span><span class="o">-</span><span class="nx">manager</span> <span class="nx">into</span> <span class="nx">a</span> <span class="nx">good</span> <span class="nx">state</span><span class="p">.</span>
+ <span class="o">*</span> <span class="o">&lt;</span><span class="nx">ol</span><span class="o">&gt;</span>
+ <span class="o">*</span>   <span class="o">&lt;</span><span class="nx">li</span><span class="o">&gt;</span><span class="nx">If</span> <span class="nx">never</span> <span class="nx">before</span> <span class="nx">initialized</span><span class="p">,</span> <span class="nx">shows</span> <span class="nx">all</span> <span class="nx">the</span> <span class="nx">markers</span><span class="p">.</span><span class="o">&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+ <span class="o">*</span>   <span class="o">&lt;</span><span class="nx">li</span><span class="o">&gt;</span><span class="nx">If</span> <span class="nx">previously</span> <span class="nx">initialized</span><span class="p">,</span> <span class="nx">removes</span> <span class="o">and</span> <span class="nx">re</span><span class="o">-</span><span class="nx">adds</span> <span class="nx">all</span> <span class="nx">markers</span><span class="p">.</span><span class="o">&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+ <span class="o">*</span> <span class="o">&lt;/</span><span class="nx">ol</span><span class="o">&gt;</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.refresh = </span><span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">shownMarkers_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">processAll_</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">shownBounds_</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">removeOverlay_</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="o">//</span> <span class="nx">An</span> <span class="nx">extra</span> <span class="nx">check</span> <span class="kc">on</span> <span class="k">this</span><span class="p">.</span><span class="nx">show_</span> <span class="nx">to</span> <span class="nx">increase</span> <span class="nx">performance</span> <span class="p">(</span><span class="kc">no</span> <span class="nx">need</span> <span class="nx">to</span> <span class="nx">processAll_</span><span class="p">)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">show_</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">processAll_</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">shownBounds_</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">addOverlay_</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">notifyListeners_</span><span class="p">();</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">After</span> <span class="nx">the</span> <span class="nx">viewport</span> <span class="nx">may</span> <span class="nx">have</span> <span class="nx">changed</span><span class="p">,</span> <span class="nx">add</span> <span class="o">or</span> <span class="nx">remove</span> <span class="nx">markers</span> <span class="nx">as</span> <span class="nx">needed</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.updateMarkers_ = </span><span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nv">mapZoom_ = </span><span class="k">this</span><span class="p">.</span><span class="nx">map_</span><span class="p">.</span><span class="nx">getZoom</span><span class="p">();</span>
+  <span class="nx">var</span> <span class="nv">newBounds = </span><span class="k">this</span><span class="p">.</span><span class="nx">getMapGridBounds_</span><span class="p">();</span>
+
+  <span class="o">//</span> <span class="nx">If</span> <span class="nx">the</span> <span class="nx">move</span> <span class="nx">does</span> <span class="o">not</span> <span class="nx">include</span> <span class="k">new</span> <span class="nx">grid</span> <span class="nx">sections</span><span class="p">,</span>
+  <span class="o">//</span> <span class="nx">we</span> <span class="nx">have</span> <span class="kc">no</span> <span class="nx">work</span> <span class="nx">to</span> <span class="nv">do:</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">newBounds</span><span class="p">.</span><span class="nx">equals</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">shownBounds_</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">newBounds</span><span class="p">.</span><span class="nx">z</span> <span class="o">===</span> <span class="k">this</span><span class="p">.</span><span class="nx">shownBounds_</span><span class="p">.</span><span class="nx">z</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="nx">newBounds</span><span class="p">.</span><span class="nx">z</span> <span class="o">!==</span> <span class="k">this</span><span class="p">.</span><span class="nx">shownBounds_</span><span class="p">.</span><span class="nx">z</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">processAll_</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">shownBounds_</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">removeOverlay_</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">show_</span><span class="p">)</span> <span class="p">{</span> <span class="o">//</span> <span class="nx">performance</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">processAll_</span><span class="p">(</span><span class="nx">newBounds</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">addOverlay_</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="o">//</span> <span class="nx">Remove</span> <span class="nv">markers:</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">rectangleDiff_</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">shownBounds_</span><span class="p">,</span> <span class="nx">newBounds</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">removeCellMarkers_</span><span class="p">);</span>
+
+    <span class="o">//</span> <span class="nx">Add</span> <span class="nv">markers:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">show_</span><span class="p">)</span> <span class="p">{</span> <span class="o">//</span> <span class="nx">performance</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">rectangleDiff_</span><span class="p">(</span><span class="nx">newBounds</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">shownBounds_</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">addCellMarkers_</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">this</span><span class="p">.</span><span class="nv">shownBounds_ = </span><span class="nx">newBounds</span><span class="p">;</span>
+
+  <span class="k">this</span><span class="p">.</span><span class="nx">notifyListeners_</span><span class="p">();</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Notify</span> <span class="nx">listeners</span> <span class="k">when</span> <span class="nx">the</span> <span class="nx">state</span> <span class="k">of</span> <span class="nx">what</span> <span class="o">is</span> <span class="nx">displayed</span> <span class="nx">changes</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.notifyListeners_ = </span><span class="nx">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s">&#39;changed&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">shownBounds_</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">shownMarkers_</span><span class="p">);</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Process</span> <span class="nx">all</span> <span class="nx">markers</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">bounds</span> <span class="nx">provided</span><span class="p">,</span> <span class="nx">using</span> <span class="nx">a</span> <span class="nx">callback</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">Bounds</span><span class="p">}</span> <span class="nx">bounds</span> <span class="nx">The</span> <span class="nx">bounds</span> <span class="k">in</span> <span class="nx">grid</span> <span class="nx">space</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Function</span><span class="p">}</span> <span class="nx">callback</span> <span class="nx">The</span> <span class="nx">function</span> <span class="nx">to</span> <span class="nx">call</span> <span class="k">for</span> <span class="nx">each</span> <span class="nx">marker</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.processAll_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">bounds</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">for</span> <span class="p">(</span><span class="nx">var</span> <span class="nv">x = </span><span class="nx">bounds</span><span class="p">.</span><span class="nx">minX</span><span class="p">;</span> <span class="nx">x</span> <span class="o">&lt;=</span> <span class="nx">bounds</span><span class="p">.</span><span class="nx">maxX</span><span class="p">;</span> <span class="nx">x</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nx">var</span> <span class="nv">y = </span><span class="nx">bounds</span><span class="p">.</span><span class="nx">minY</span><span class="p">;</span> <span class="nx">y</span> <span class="o">&lt;=</span> <span class="nx">bounds</span><span class="p">.</span><span class="nx">maxY</span><span class="p">;</span> <span class="nx">y</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">processCellMarkers_</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span>  <span class="nx">bounds</span><span class="p">.</span><span class="nx">z</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Process</span> <span class="nx">all</span> <span class="nx">markers</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">grid</span> <span class="nx">cell</span><span class="p">,</span> <span class="nx">using</span> <span class="nx">a</span> <span class="nx">callback</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">x</span> <span class="nx">The</span> <span class="nx">x</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">y</span> <span class="nx">The</span> <span class="nx">y</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">z</span> <span class="nx">The</span> <span class="nx">z</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Function</span><span class="p">}</span> <span class="nx">callback</span> <span class="nx">The</span> <span class="nx">function</span> <span class="nx">to</span> <span class="nx">call</span> <span class="k">for</span> <span class="nx">each</span> <span class="nx">marker</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.processCellMarkers_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">cell = </span><span class="k">this</span><span class="p">.</span><span class="nx">getGridCellNoCreate_</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">cell</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nx">var</span> <span class="nv">i = </span><span class="nx">cell</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">--</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">callback</span><span class="p">(</span><span class="nx">cell</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Remove</span> <span class="nx">all</span> <span class="nx">markers</span> <span class="k">in</span> <span class="nx">a</span> <span class="nx">grid</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">x</span> <span class="nx">The</span> <span class="nx">x</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">y</span> <span class="nx">The</span> <span class="nx">y</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">z</span> <span class="nx">The</span> <span class="nx">z</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.removeCellMarkers_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">processCellMarkers_</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">removeOverlay_</span><span class="p">);</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Add</span> <span class="nx">all</span> <span class="nx">markers</span> <span class="k">in</span> <span class="nx">a</span> <span class="nx">grid</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">x</span> <span class="nx">The</span> <span class="nx">x</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">y</span> <span class="nx">The</span> <span class="nx">y</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span> <span class="nx">z</span> <span class="nx">The</span> <span class="nx">z</span> <span class="nx">coordinate</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">cell</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.addCellMarkers_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">processCellMarkers_</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">addOverlay_</span><span class="p">);</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Use</span> <span class="nx">the</span> <span class="nx">rectangleDiffCoords_</span> <span class="nx">function</span> <span class="nx">to</span> <span class="nx">process</span> <span class="nx">all</span> <span class="nx">grid</span> <span class="nx">cells</span>
+ <span class="o">*</span> <span class="nx">that</span> <span class="nx">are</span> <span class="k">in</span> <span class="nx">bounds1</span> <span class="nx">but</span> <span class="o">not</span> <span class="nx">bounds2</span><span class="p">,</span> <span class="nx">using</span> <span class="nx">a</span> <span class="nx">callback</span><span class="p">,</span> <span class="o">and</span> <span class="nx">using</span>
+ <span class="o">*</span> <span class="nx">the</span> <span class="nx">current</span> <span class="nx">MarkerManager</span> <span class="nx">object</span> <span class="nx">as</span> <span class="nx">the</span> <span class="nx">instance</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">Pass</span> <span class="nx">the</span> <span class="nx">z</span> <span class="nx">parameter</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">callback</span> <span class="k">in</span> <span class="nx">addition</span> <span class="nx">to</span> <span class="nx">x</span> <span class="o">and</span> <span class="nx">y</span><span class="p">.</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">Bounds</span><span class="p">}</span> <span class="nx">bounds1</span> <span class="nx">The</span> <span class="nx">bounds</span> <span class="k">of</span> <span class="nx">all</span> <span class="nx">points</span> <span class="nx">we</span> <span class="nx">may</span> <span class="nx">process</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">Bounds</span><span class="p">}</span> <span class="nx">bounds2</span> <span class="nx">The</span> <span class="nx">bounds</span> <span class="k">of</span> <span class="nx">points</span> <span class="nx">to</span> <span class="nx">exclude</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Function</span><span class="p">}</span> <span class="nx">callback</span> <span class="nx">The</span> <span class="nx">callback</span> <span class="nx">function</span> <span class="nx">to</span> <span class="nx">call</span>
+ <span class="o">*</span>                   <span class="k">for</span> <span class="nx">each</span> <span class="nx">grid</span> <span class="nx">coordinate</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span><span class="p">).</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.rectangleDiff_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">bounds1</span><span class="p">,</span> <span class="nx">bounds2</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">me = </span><span class="k">this</span><span class="p">;</span>
+  <span class="nx">me</span><span class="p">.</span><span class="nx">rectangleDiffCoords_</span><span class="p">(</span><span class="nx">bounds1</span><span class="p">,</span> <span class="nx">bounds2</span><span class="p">,</span> <span class="nx">function</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">callback</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">me</span><span class="p">,</span> <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">bounds1</span><span class="p">.</span><span class="nx">z</span><span class="p">]);</span>
+  <span class="p">});</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Calls</span> <span class="nx">the</span> <span class="nx">function</span> <span class="k">for</span> <span class="nx">all</span> <span class="nx">points</span> <span class="k">in</span> <span class="nx">bounds1</span><span class="p">,</span> <span class="o">not</span> <span class="k">in</span> <span class="nx">bounds2</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">Bounds</span><span class="p">}</span> <span class="nx">bounds1</span> <span class="nx">The</span> <span class="nx">bounds</span> <span class="k">of</span> <span class="nx">all</span> <span class="nx">points</span> <span class="nx">we</span> <span class="nx">may</span> <span class="nx">process</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">Bounds</span><span class="p">}</span> <span class="nx">bounds2</span> <span class="nx">The</span> <span class="nx">bounds</span> <span class="k">of</span> <span class="nx">points</span> <span class="nx">to</span> <span class="nx">exclude</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Function</span><span class="p">}</span> <span class="nx">callback</span> <span class="nx">The</span> <span class="nx">callback</span> <span class="nx">function</span> <span class="nx">to</span> <span class="nx">call</span>
+ <span class="o">*</span>                   <span class="k">for</span> <span class="nx">each</span> <span class="nx">grid</span> <span class="nx">coordinate</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.rectangleDiffCoords_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">bounds1</span><span class="p">,</span> <span class="nx">bounds2</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">minX1 = </span><span class="nx">bounds1</span><span class="p">.</span><span class="nx">minX</span><span class="p">;</span>
+  <span class="nx">var</span> <span class="nv">minY1 = </span><span class="nx">bounds1</span><span class="p">.</span><span class="nx">minY</span><span class="p">;</span>
+  <span class="nx">var</span> <span class="nv">maxX1 = </span><span class="nx">bounds1</span><span class="p">.</span><span class="nx">maxX</span><span class="p">;</span>
+  <span class="nx">var</span> <span class="nv">maxY1 = </span><span class="nx">bounds1</span><span class="p">.</span><span class="nx">maxY</span><span class="p">;</span>
+  <span class="nx">var</span> <span class="nv">minX2 = </span><span class="nx">bounds2</span><span class="p">.</span><span class="nx">minX</span><span class="p">;</span>
+  <span class="nx">var</span> <span class="nv">minY2 = </span><span class="nx">bounds2</span><span class="p">.</span><span class="nx">minY</span><span class="p">;</span>
+  <span class="nx">var</span> <span class="nv">maxX2 = </span><span class="nx">bounds2</span><span class="p">.</span><span class="nx">maxX</span><span class="p">;</span>
+  <span class="nx">var</span> <span class="nv">maxY2 = </span><span class="nx">bounds2</span><span class="p">.</span><span class="nx">maxY</span><span class="p">;</span>
+
+  <span class="nx">var</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="nv">x = </span><span class="nx">minX1</span><span class="p">;</span> <span class="nx">x</span> <span class="o">&lt;=</span> <span class="nx">maxX1</span><span class="p">;</span> <span class="nx">x</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>  <span class="o">//</span> <span class="nx">All</span> <span class="nx">x</span> <span class="k">in</span> <span class="nx">R1</span>
+    <span class="o">//</span> <span class="nx">All</span> <span class="nv">above:</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nv">y = </span><span class="nx">minY1</span><span class="p">;</span> <span class="nx">y</span> <span class="o">&lt;=</span> <span class="nx">maxY1</span> <span class="o">&amp;&amp;</span> <span class="nx">y</span> <span class="o">&lt;</span> <span class="nx">minY2</span><span class="p">;</span> <span class="nx">y</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>  <span class="o">//</span> <span class="nx">y</span> <span class="k">in</span> <span class="nx">R1</span> <span class="nx">above</span> <span class="nx">R2</span>
+      <span class="nx">callback</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="o">//</span> <span class="nx">All</span> <span class="nv">below:</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nv">y = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span><span class="nx">maxY2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">minY1</span><span class="p">);</span>  <span class="o">//</span> <span class="nx">y</span> <span class="k">in</span> <span class="nx">R1</span> <span class="nx">below</span> <span class="nx">R2</span>
+         <span class="nx">y</span> <span class="o">&lt;=</span> <span class="nx">maxY1</span><span class="p">;</span> <span class="nx">y</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">callback</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="nv">y = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span><span class="nx">minY1</span><span class="p">,</span> <span class="nx">minY2</span><span class="p">);</span>
+       <span class="nx">y</span> <span class="o">&lt;=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">min</span><span class="p">(</span><span class="nx">maxY1</span><span class="p">,</span> <span class="nx">maxY2</span><span class="p">);</span> <span class="nx">y</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>  <span class="o">//</span> <span class="nx">All</span> <span class="nx">y</span> <span class="k">in</span> <span class="nx">R2</span> <span class="o">and</span> <span class="k">in</span> <span class="nx">R1</span>
+    <span class="o">//</span> <span class="nx">Strictly</span> <span class="nv">left:</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nv">x = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">min</span><span class="p">(</span><span class="nx">maxX1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">minX2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+         <span class="nx">x</span> <span class="o">&gt;=</span> <span class="nx">minX1</span><span class="p">;</span> <span class="nx">x</span><span class="o">--</span><span class="p">)</span> <span class="p">{</span>  <span class="o">//</span> <span class="nx">x</span> <span class="k">in</span> <span class="nx">R1</span> <span class="nx">left</span> <span class="k">of</span> <span class="nx">R2</span>
+      <span class="nx">callback</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="o">//</span> <span class="nx">Strictly</span> <span class="nv">right:</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nv">x = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span><span class="nx">minX1</span><span class="p">,</span> <span class="nx">maxX2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>  <span class="o">//</span> <span class="nx">x</span> <span class="k">in</span> <span class="nx">R1</span> <span class="nx">right</span> <span class="k">of</span> <span class="nx">R2</span>
+         <span class="nx">x</span> <span class="o">&lt;=</span> <span class="nx">maxX1</span><span class="p">;</span> <span class="nx">x</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">callback</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+
+<span class="o">/**</span>
+ <span class="o">*</span> <span class="nx">Removes</span> <span class="nx">value</span> <span class="nx">from</span> <span class="nx">array</span><span class="p">.</span> <span class="nx">O</span><span class="p">(</span><span class="nx">N</span><span class="p">).</span>
+ <span class="o">*</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Array</span><span class="p">}</span> <span class="nx">array</span>  <span class="nx">The</span> <span class="nx">array</span> <span class="nx">to</span> <span class="nx">modify</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nx">any</span><span class="p">}</span> <span class="nx">value</span>  <span class="nx">The</span> <span class="nx">value</span> <span class="nx">to</span> <span class="nx">remove</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@param</span> <span class="p">{</span><span class="nb">Boolean</span><span class="p">}</span> <span class="nx">opt_notype</span>  <span class="nx">Flag</span> <span class="nx">to</span> <span class="nx">disable</span> <span class="nx">type</span> <span class="nx">checking</span> <span class="k">in</span> <span class="nx">equality</span><span class="p">.</span>
+ <span class="o">*</span> <span class="nx">@</span><span class="k">return</span> <span class="p">{</span><span class="nb">Number</span><span class="p">}</span>  <span class="nx">The</span> <span class="nx">number</span> <span class="k">of</span> <span class="nx">instances</span> <span class="k">of</span> <span class="nx">value</span> <span class="nx">that</span> <span class="nx">were</span> <span class="nx">removed</span><span class="p">.</span>
+ <span class="o">*/</span>
+<span class="nv">MarkerManager.prototype.removeFromArray_ = </span><span class="nx">function</span> <span class="p">(</span><span class="nx">array</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">opt_notype</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">var</span> <span class="nv">shift = </span><span class="mi">0</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="nx">var</span> <span class="nv">i = </span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">array</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="o">++</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">array</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">===</span> <span class="nx">value</span> <span class="o">||</span> <span class="p">(</span><span class="nx">opt_notype</span> <span class="o">&amp;&amp;</span> <span class="nx">array</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">===</span> <span class="nx">value</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">array</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="nx">i</span><span class="o">--</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+      <span class="nx">shift</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">shift</span><span class="p">;</span>
+<span class="p">};</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
