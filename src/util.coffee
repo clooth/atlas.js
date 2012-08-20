@@ -8,7 +8,7 @@
     unless window.requestAnimationFrame
         for vendor in vendors
             window.requestAnimationFrame = window[vendor + 'RequestAnimationFrame']
-            window.cancelAnimationFrame = window[vendor + 'CancelAnimationFrame'] || window[vendor + CancelRequestAnimationFrame]
+            window.cancelAnimationFrame = window[vendor + 'CancelAnimationFrame'] || window[vendor + 'CancelRequestAnimationFrame']
 
     unless window.requestAnimationFrame
         window.requestAnimationFrame = (callback, element) ->
